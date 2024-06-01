@@ -42,29 +42,46 @@ regd_users.post("/login", (req,res) => {
   }
 });
 
-// Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
-  const userReview = req.body.review;
-  const booksIDs = Object.keys(books);
-  const requestedBook = booksIDs.filter(bookID => bookID === isbn);
-  const allReqBookReviews = Object.values(books[requestedBook].reviews);
   const currentSessionUser = req.session.authorization.username;
-  console.log(allReqBookReviews);
 
   if (currentSessionUser) {
-    const oldUserReview = allReqBookReviews.filter(review => review.username === currentSessionUser);
+    const isEmptyReviews = Object.values(books[isbn]?.reviews).length <= 0;
 
-    if (oldUserReview.length) {
-        oldUserReview.review = userReview;
+    if (isEmptyReviews) {
+        return res.status(500).json("No Reviews were added yet to the book");
     } else {
-        allReqBookReviews.push({username: currentSessionUser, review: userReview});
+        delete books[isbn].reviews[currentSessionUser];
+        return res.status(200).json("Review is deleted!");
     }
-    return res.status(200).json("User Review added / updated");
   } else {
     return res.status(300).json("User session is finished");
   }
 });
+
+
+// Add a book review
+regd_users.put("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    const userReview = req.body.review;
+    const currentSessionUser = req.session.authorization.username;
+  
+    if (currentSessionUser) {
+      const isEmptyReviews = Object.values(books[isbn]?.reviews).length <= 0;
+  
+      if (isEmptyReviews) {
+          Object.assign(books[isbn].reviews, {[currentSessionUser]: {review: userReview}})
+      } else {
+          books[isbn].reviews[currentSessionUser].review = userReview
+      }
+  
+      return res.status(200).json("User Review added / updated");
+    } else {
+      return res.status(300).json("User session is finished");
+    }
+  });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
