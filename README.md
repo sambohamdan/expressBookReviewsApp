@@ -1,1 +1,1 @@
-# coding-project-template
+# IBM course - Create web service layer to handle a book store API requists for guest and loggedin users using Node.js and Express.js
