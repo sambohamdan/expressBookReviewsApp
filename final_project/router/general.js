@@ -47,7 +47,7 @@ function getByISBN(isbn) {
 }
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', async function (req, res) {
-    getByISBN(req.params.isbn)
+    await getByISBN(req.params.isbn)
     .then(
         result => res.send(result),
         error => res.status(error.status).json({message: error.message})
